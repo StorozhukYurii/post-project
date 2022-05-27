@@ -107,15 +107,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     let modalTrigger = document.querySelectorAll('[data-modal]'),
-        modal = document.querySelector('.modal'),
-        modalCloseBtn = document.querySelector('[data-close]');
+        modal = document.querySelector('.modal')
+
 
     function openModal() {
         modal.classList.add('show')
         modal.classList.remove('hide')
         // modal.classList.toggle('show')
         document.body.style.overflow = 'hidden'
-        // clearInterval(modalTimerId)
+        clearInterval(modalTimerId)
     }
 
 
@@ -131,10 +131,9 @@ document.addEventListener("DOMContentLoaded", () => {
         document.body.style.overflow = ''
     }
 
-    modalCloseBtn.addEventListener('click', closeModal)
 
     modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
+        if (e.target === modal || e.target.getAttribute('data-close') == '') {
             closeModal()
         }
     })
@@ -144,7 +143,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     })
 
-    // let modalTimerId = setTimeout(openModal, 10000)
+    let modalTimerId = setTimeout(openModal, 50000)
 
     function showModalByScroll() {
         if (window.pageYOffset + document.documentElement.clientHeight >= document.documentElement.scrollHeight - 1) {
@@ -235,8 +234,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let form = document.querySelectorAll('form')
 
-    let  message ={
-        loading: "loading",
+    let message = {
+        loading: "img/form/spinner.svg",
         success: "thank!",
         failure: "some th wrong"
     }
@@ -245,34 +244,125 @@ document.addEventListener("DOMContentLoaded", () => {
         postData(item)
     })
 
-    function postData(form){
-        form.addEventListener('submit', (event) =>{
+    function postData(form) {
+        form.addEventListener('submit', (event) => {
             event.preventDefault();
 
-            let statusMessage = document.createElement('div')
-            statusMessage.classList.add('status')
-            statusMessage.textContent = message.loading
-            form.append(statusMessage)
-            
-            let request = new XMLHttpRequest();
-            request.open('POST','server.php')
-
-            request.setRequestHeader('Content-type', 'multipart/form-data')
+            let statusMessage = document.createElement('img')
+            statusMessage.src = message.loading
+            statusMessage.style.cssText = `
+            display:block;
+            margin:0 auto;
+            `
+            form.insertAdjacentElement('afterend', statusMessage)
             let formData = new FormData(form)
 
-            request.send(formData)
 
-            request.addEventListener('load', () =>{
-                if(request.status === 200){
-                    statusMessage.textContent= message.success
-                    console.log(request.response);
-                    
-                }else{
-                    statusMessage.textContent = message.failure
-                }
+            //старий варіант задання по XMLHttpRequest()
+            // let request = new XMLHttpRequest();
+            // request.open('POST','server.php')
+            // let formData = new FormData(form)
+            // request.send(formData)
+
+            //стрий варіант задання по JSON
+            // request.setRequestHeader('Content-type', 'application/json')
+            // let obj ={}
+            // formData.forEach(function(value, key){
+            //     obj[key] = value
+            // })
+            // let json =JSON.stringify(obj)
+            // request.send(json)
+
+            //!!!!!зараз використовується фетч з форм дата
+            // fetch('server.php', {
+            //     method: 'POST',
+            //     body: formData
+            // }).then(data => data.text())
+            // .then(data => {
+            //     console.log(data)
+            //     showThanksModal(message.success); 
+            //     statusMessage.remove()
+            // }).catch(() => {
+            //     showThanksModal(message.failure)
+            // }).finally(() => {
+            //     form.reset()
+            // })
+
+
+            //!!!!!зараз використовується фетч з джсон формат
+            let obj ={}
+            formData.forEach(function(value, key){
+                obj[key] = value
             })
+            
+            fetch('server.php', {
+                method: 'POST',
+                headers: {
+                    'Content-type': 'application/json'
+                },
+                body: JSON.stringify(obj)
+            }).then(data => data.text())
+            .then(data => {
+                console.log(data)
+                showThanksModal(message.success); 
+                statusMessage.remove()
+            }).catch(() => {
+                showThanksModal(message.failure)
+            }).finally(() => {
+                form.reset()
+            })
+
+            // request.addEventListener('load', () =>{
+            //     if(request.status === 200){
+            //         showThanksModal(message.success) 
+            //         console.log(request.response);
+            //         form.reset()
+            //         statusMessage.remove()
+            //     }else{
+            //        showThanksModal(message.failure)
+            //     }
+            // })
         })
     }
+
+
+    // вікно з подякою, стилізація
+
+    function showThanksModal(message) {
+        let prevModalDialog = document.querySelector('.modal__dialog')
+
+        prevModalDialog.classList.add('hide')
+        openModal()
+
+        let thanksModal = document.createElement('div')
+        thanksModal.classList.add('modal__dialog')
+        thanksModal.innerHTML = `
+        <div class="modal__content">
+            <div data-close class="modal__close">×</div>
+            <div class="modal__title">${message}</div>
+            </div>
+        `
+        document.querySelector('.modal').append(thanksModal)
+
+        setTimeout(() => {
+            thanksModal.remove()
+            prevModalDialog.classList.add('show')
+            prevModalDialog.classList.remove('hide')
+            closeModal()
+        }, 4000)
+
+    }
+    //приклад   
+    // fetch('https://jsonplaceholder.typicode.com/posts', {
+    //     method:"POST",
+    //     body: JSON.stringify({name:'Alex'}),
+    //     headers:{
+    //         'Content-type':'application/json'
+    //     }
+    // })
+    // .then(response => response.json())
+    // .then(json => console.log(json))
+
 })
 
 
