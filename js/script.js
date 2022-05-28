@@ -199,9 +199,9 @@ document.addEventListener("DOMContentLoaded", () => {
             this.parent.append(elem)
         }
     }
-    let getResource = async (url) =>{
+    let getResource = async (url) => {
         let res = await fetch(url)
-        if(!res.ok){
+        if (!res.ok) {
             throw new Error(`Could not fetch ${url}, status: ${res.status}`)
         }
 
@@ -209,11 +209,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     getResource('http://localhost:3000/menu')
-    .then(data =>{
-        data.forEach(({img, altimg, title, descr, price}) =>{
-            new MenuCard(img, altimg, title, descr, price, '.menu .container').render()
+        .then(data => {
+            data.forEach(({ img, altimg, title, descr, price }) => {
+                new MenuCard(img, altimg, title, descr, price, '.menu .container').render()
+            })
         })
-    })
 
 
     // інший варіант написання функції тої що зверху. але без застосування класів
@@ -254,13 +254,13 @@ document.addEventListener("DOMContentLoaded", () => {
         bindPostData(item)
     })
 
-    let postData = async (url,data) =>{
-        let res = await fetch(url,{
-            method:"POST",
-            headers:{
-                'Content-type':'application/json'
+    let postData = async (url, data) => {
+        let res = await fetch(url, {
+            method: "POST",
+            headers: {
+                'Content-type': 'application/json'
             },
-            body:data
+            body: data
         })
         return await res.json()
     }
@@ -319,8 +319,8 @@ document.addEventListener("DOMContentLoaded", () => {
             // })
 
             //інший спосіб перетворити нашу формдату в джейсон
-            let json =JSON.stringify(Object.fromEntries(formData.entries()))
-            
+            let json = JSON.stringify(Object.fromEntries(formData.entries()))
+
             //код нижче видаляється через те що є стрічка нижче, оскільки ми вписали все в асінг авайт вище
             // fetch('server.php', {
             //     method: 'POST',
@@ -329,17 +329,17 @@ document.addEventListener("DOMContentLoaded", () => {
             //     },
             //     body: JSON.stringify(obj)
             // })
-            postData('http://localhost:3000/requests',json)
-            // .then(data => data.text()) ця трансформація не потрібна оскільки вона є вже в постдата і схована там всередині
-            .then(data => {
-                console.log(data)
-                showThanksModal(message.success); 
-                statusMessage.remove()
-            }).catch(() => {
-                showThanksModal(message.failure)
-            }).finally(() => {
-                form.reset()
-            })
+            postData('http://localhost:3000/requests', json)
+                // .then(data => data.text()) ця трансформація не потрібна оскільки вона є вже в постдата і схована там всередині
+                .then(data => {
+                    console.log(data)
+                    showThanksModal(message.success);
+                    statusMessage.remove()
+                }).catch(() => {
+                    showThanksModal(message.failure)
+                }).finally(() => {
+                    form.reset()
+                })
 
             // request.addEventListener('load', () =>{
             //     if(request.status === 200){
@@ -394,9 +394,336 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     fetch('http://localhost:3000/menu')
-    .then(data => data.json())
-    .then(res => console.log(res));
+        .then(data => data.json())
+        .then(res => console.log(res));
 
+
+
+    //слайдер1
+
+    // let slides = document.querySelectorAll('.offer__slide'),
+    //     prev = document.querySelector('.offer__slider-prev'),
+    //     next = document.querySelector('.offer__slider-next'),
+    //     tot = document.querySelector('#total'),
+    //     current = document.querySelector('#current')
+    // let slideIndex = 1;
+
+    // showSlides(slideIndex)
+
+    // if(slides.length < 10){
+    //     tot.textContent = `0${slides.length}`
+    // }else{
+    //     tot.textContent = slides.length
+    // }
+
+    // function showSlides(n) {
+    //     if (n > slides.length) {
+    //         slideIndex = 1;
+    //     }
+
+    //     if (n < 1) {
+    //         slideIndex = slides.length;
+    //     }
+
+    //     slides.forEach(item => item.style.display = 'none')
+
+    //     slides[slideIndex - 1].style.display = 'block'
+
+    //     if(slides.length < 10){
+    //         current.textContent = `0${slideIndex}`
+    //     }else{
+    //         current.textContent = slideIndex
+
+    //     }
+    // }
+
+    // function plusSlides(n) {
+    //     showSlides(slideIndex += n)
+    // }
+
+    // prev.addEventListener('click', () => {
+    //     plusSlides(-1)
+    // })
+
+    // next.addEventListener('click', () => {
+    //     plusSlides(1)
+    // })
+
+
+    //слайдер 2
+
+    let slides = document.querySelectorAll('.offer__slide'),
+        prev = document.querySelector('.offer__slider-prev'),
+        next = document.querySelector('.offer__slider-next'),
+        tot = document.querySelector('#total'),
+        current = document.querySelector('#current'),
+        slidesWrapper = document.querySelector('.offer__slider-wrapper'),
+        slidesField = document.querySelector('.offer__slider-inner'),
+        width = window.getComputedStyle(slidesWrapper).width,
+        slider = document.querySelector('.offer__slider')
+    let slideIndex = 1;
+    let offset = 0
+
+    if (slides.length < 10) {
+        current.textContent = `0${slideIndex}`
+        total.textContent = `0${slides.length}`
+    } else {
+        current.textContent = slideIndex
+        total.textContent = slides.length
+
+    }
+
+    slidesField.style.width = 100 * slides.length + '%'
+    slidesField.style.display = 'flex'
+    slidesField.style.transition = '0.5s all'
+    slidesWrapper.style.overflow = 'hidden'
+
+    slides.forEach(slide => {
+        slide.style.width = width
+    })
+
+    slider.style.position = 'relative'
+
+    let indicators = document.createElement('ol'),
+        dots = []
+    indicators.classList.add('carousel-indicators')
+    indicators.style.cssText = `
+        position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 15;
+    display: flex;
+    justify-content: center;
+    margin-right: 15%;
+    margin-left: 15%;
+    list-style: none;
+        `
+    slider.append(indicators)
+
+    for (let i = 0; i < slides.length; i++) {
+        let dot = document.createElement('li')
+        dot.setAttribute('data-slide-to', i + 1)
+        dot.style.cssText = `
+        
+        box-sizing: content-box;
+    flex: 0 1 auto;
+    width: 30px;
+    height: 6px;
+    margin-right: 3px;
+    margin-left: 3px;
+    cursor: pointer;
+    background-color: #fff;
+    background-clip: padding-box;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    opacity: .5;
+    transition: opacity .6s ease;
+    `
+        if (i == 0) {
+            dot.style.opacity = 1
+        }
+        indicators.append(dot)
+        dots.push(dot)
+    }
+
+    function deleteNoDigits(item) {
+        return +item.replace(/\D/g, '')
+    }
+
+    next.addEventListener('click', () => {
+        if (offset == deleteNoDigits(width) * (slides.length - 1)) {
+            offset = 0
+        } else {
+            offset += deleteNoDigits(width)
+        }
+
+        slidesField.style.transform = `translateX(-${offset}px)`
+
+        if (slideIndex == slides.length) {
+            slideIndex = 1
+        } else {
+            slideIndex++
+        }
+
+        if (slides.length < 10) {
+            current.textContent = `0${slideIndex}`
+        } else {
+            current.textContent = slideIndex
+        }
+
+        dots.forEach(dot => dot.style.opacity = '.5')
+        dots[slideIndex - 1].style.opacity = 1
+    })
+    prev.addEventListener('click', () => {
+        if (offset == 0) {
+            offset = deleteNoDigits(width) * (slides.length - 1)
+
+        } else {
+            offset -= deleteNoDigits(width)
+        }
+
+        slidesField.style.transform = `translateX(-${offset}px)`
+        if (slideIndex == 1) {
+            slideIndex = slides.length
+        } else {
+            slideIndex--
+        }
+
+        if (slides.length < 10) {
+            current.textContent = `0${slideIndex}`
+        } else {
+            current.textContent = slideIndex
+        }
+
+
+
+        dots.forEach(dot => dot.style.opacity = '.5')
+        dots[slideIndex - 1].style.opacity = 1
+    })
+
+
+    dots.forEach(dot => {
+        dot.addEventListener('click', (e) => {
+            let slideTo = e.target.getAttribute('data-slide-to')
+
+            slideIndex = slideTo
+            offset = deleteNoDigits(width) * (slideTo - 1)
+
+            slidesField.style.transform = `translateX(-${offset}px)`
+
+            if (slides.length < 10) {
+                current.textContent = `0${slideIndex}`
+            } else {
+                current.textContent = slideIndex
+            }
+
+            dots.forEach(dot => dot.style.opacity = '.5')
+            dots[slideIndex - 1].style.opacity = 1
+        })
+    })
+
+
+
+    //калькулятор
+
+    let result = document.querySelector('.calculating__result span')
+    let sex, height, weight, age, ratio
+    
+    if(localStorage.getItem('sex')){
+        sex = localStorage.getItem('sex')
+    }else{
+        sex ='female'
+        localStorage.setItem('sex', 'female')
+    }
+    
+    if(localStorage.getItem('ratio')){
+        ratio = localStorage.getItem('ratio')
+    }else{
+        ratio = 1.375
+        localStorage.setItem('ratio', 1.375)
+    }
+    
+    function initLocalSetting(selector, activeClass){
+        let elements = document.querySelectorAll
+        (selector)
+
+        elements.forEach(elem =>{
+            elem.classList.remove(activeClass)
+            if(elem.getAttribute('id') === localStorage.getItem('sex')){
+                elem.classList.add(activeClass)
+            }
+
+            if(elem.getAttribute('data-ratio') === localStorage.getItem('ratio')){
+                elem.classList.add(activeClass)
+            }
+        })
+    }
+    initLocalSetting('#gender div', 'calculating__choose-item_active')
+    initLocalSetting('.calculating__choose_big div', 'calculating__choose-item_active')
+    result.classList.add('hide')
+
+
+    function calcTotal() {
+        if (!sex || !height || !weight || !age || !ratio) {
+            return 
+            
+        }
+
+        if (sex === 'famale') {
+            result.textContent = Math.round((447.6 + (9.2 * weight) + (3.1 * height) - (4.3 * age)) * ratio)
+            result.classList.remove('hide')
+            result.classList.add('show')
+
+        } else {
+            result.textContent = Math.round((88.36 + (13.4 * weight) + (4.8 * height) - (5.7 * age)) * ratio)
+            result.classList.remove('hide')
+            result.classList.add('show')
+
+        }
+    }
+
+    function getStaticInformation(selector, activeClass) {
+        let elements = document.querySelectorAll(selector)
+
+        elements.forEach(elem => {
+            elem.addEventListener('click', (e) => {
+                if (e.target.getAttribute('data-ratio')) {
+                    ratio = +e.target.getAttribute('data-ratio')
+                    localStorage.setItem('ratio', +e.target.getAttribute('data-ratio') )
+                } else {
+                    sex =e.target.getAttribute('id')
+                    localStorage.setItem('sex',e.target.getAttribute('id'))
+                }
+
+                elements.forEach(elem => {
+                    elem.classList.remove(activeClass)
+                })
+
+                e.target.classList.add(activeClass)
+
+                calcTotal()
+            })
+
+        })
+
+    }
+    getStaticInformation('#gender div', 'calculating__choose-item_active')
+    getStaticInformation('.calculating__choose_big div', 'calculating__choose-item_active')
+
+    function getDynamicInformation(selector) {
+        const input = document.querySelector(selector)
+        
+        
+
+        input.addEventListener('input', () => {
+            
+            if(input.value.match(/\D/g)){
+                input.style.border = '1px solid red';
+            } else{
+                input.style.border = 'none'
+            }
+
+            switch (input.getAttribute('id')) {
+                case 'height':
+                    height = +input.value;
+                    break;
+                case 'weight':
+                    weight = +input.value;
+                    break;
+                case 'age':
+                    age = +input.value;
+                    break;
+            }
+
+            calcTotal()
+        })
+
+
+    }
+    getDynamicInformation('#height')
+    getDynamicInformation('#weight')
+    getDynamicInformation('#age')
 })
 
 
